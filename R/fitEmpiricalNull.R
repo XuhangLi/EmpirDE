@@ -22,7 +22,8 @@
 #' result <- fit_emoirical_null(XYZ)
 
 # all non-base functions to be called by ::
-
+# enter the project folder
+#
 
 fit_empirical_null <- function(statTbl, display) {
   # display: whether or not display the fitting of data with heavy tails
