@@ -18,14 +18,17 @@
 #'
 #' @author Xuhang Li
 #' @examples
-#' data(abc)
-#' result <- fit_emoirical_null(XYZ)
+#' data(example_stat_table)
+#' result <- fit_empirical_null(example_stat_table)
 
 # all non-base functions to be called by ::
 # enter the project folder
-#
+# create function files in R
+# run devtools::document() to document the new changes
+# then run build - check
+# when done, run Git - commit - push
 
-fit_empirical_null <- function(statTbl, display) {
+fit_empirical_null <- function(statTbl, display = FALSE) {
   # display: whether or not display the fitting of data with heavy tails
 
   library(locfdr)
