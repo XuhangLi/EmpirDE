@@ -30,38 +30,58 @@
 
 WPS_DE <- function(countTable, metaDataTable) {
 
-  # step1: perform the control dependent DE analysis
-  for (plateID in c('met1','met2','met3','met4','met5','met6','met7','met8','met9','met10','met11','met13')){
-    # load the target library set
-    load(paste('./../1_QC_dataCleaning/outputs/cleaned_merged_raw_data_',plateID,'.Rdata',sep = ''))
-    batches = levels(batchLabel)
-    library(DESeq2)
-    library(limma)
-    library(edgeR)
-    #mergeTbl = data.frame()
-    for (i in 1:length(batches)){
-      if (!(batches[i] %in% c('met3_lib4','met2_lib5'))){
-        # pick the control samples (in the batches belonging to target DE group)
-        subsetInd = batchLabel == batches[i]
-        # merge selected library with the extra controls
-        input_subset = input[,subsetInd] # %>% rownames_to_column('gene') %>%
-        # inner_join(input_extr_ctr %>% rownames_to_column('gene'), by = 'gene')
-        # rownames(input_subset) = input_subset$gene
-        # input_subset = input_subset[,-1]
-        batchLabel_subset = colnames(input_subset)
-        batchLabel_subset = str_extract(batchLabel_subset,'_rep._met[0-9]+_')
-        batchLabel_subset = str_replace(batchLabel_subset,'_met._$','')
-        batchLabel_subset = as.factor(batchLabel_subset)
-        # batchLabel_subset = as.factor(c(as.character(batchLabel[subsetInd]), batchLabel_extr_ctr))
-        RNAi_subset = dropEmptyLevels(RNAi[subsetInd])
-        # RNAi_subset[(1+length(RNAi_subset)):(length(batchLabel_extr_ctr)+length(RNAi_subset))] = 'x.vector'
+  # make sure the counttable and meta data table are aligned
+  metaDataTable = metaDataTable[match(metaDataTable$sampleID, colnames(countTable)),]
+  if (!identical(metaDataTable$sampleID, colnames(countTable))){
+    stop('The meta-data table is not aligned with column names of the count table!')
+  }
 
-        coldata =  data.frame(batchLabel = batchLabel_subset, RNAi = RNAi_subset)
-        rownames(coldata) = colnames(input_subset)
-        dds <- DESeqDataSetFromMatrix(countData = input_subset,
-                                      colData = coldata,
-                                      design= ~ batchLabel + RNAi)
-         control_dependent_DE(dds)
+  # step1: perform the control dependent and independent DE analysis
+
+  cat("\033[31mStarting control-(in)dependent DE analysis per library ...\033[39m\n")
+  libs = unique(metaDataTable$libID)
+  ctr_dep_DE_res = list()
+  for (i in 1:length(libs)){
+    # subset to the libary being analyzed
+    subsetInd = metaDataTable$libID == libs[i]
+    input_subset = countTable[,subsetInd]
+    batchLabel_subset = metaDataTable$covBatch[subsetInd]
+    batchLabel_subset = as.factor(batchLabel_subset)
+    RNAi_subset = factor(metaDataTable$covTreatment[subsetInd], levels = c('control', setdiff(metaDataTable$covTreatment[subsetInd], 'control')))
+    # create dds object
+    coldata =  data.frame(batchLabel = batchLabel_subset, RNAi = RNAi_subset)
+    rownames(coldata) = colnames(input_subset)
+    if (any(colnames(metaDataTable) == 'plate2')){
+      coldata$plate2 =  metaDataTable$plate2[subsetInd]
+      }
+    cat("Performing control-dependent DE analysis for library", libs[i],"\n")
+    invisible(suppressMessages(dds <- DESeq2::DESeqDataSetFromMatrix(countData = input_subset,
+                                                colData = coldata,
+                                                design= ~ batchLabel + RNAi)))
+    # pre-filtering
+    keep <- rowSums(counts(dds)>=10) >= 1
+    dds <- dds[keep,]
+    # pre-calculating size factors
+    dds = estimateSizeFactors(dds)
+
+    # perform control-dependent DE analysis
+    invisible(suppressMessages(DE_res_list <- control_dependent_DE(dds)))
+    names(DE_res_list) = paste(libs[i], names(DE_res_list),sep = '_')
+    ctr_dep_DE_res = c(ctr_dep_DE_res, DE_res_list)
+
+    # perform control-independent DE analysis
+    cat("Performing control-independent DE analysis for library", libs[i],"\n")
+    cat("Fit main populations ...\n")
+    invisible(suppressMessages(zMat <- fit_main_population(dds)))
+    cat("Runing DEseq2 again ...\n")
+    DE_res_list <- control_independent_DE(dds, zMat)
+
+
+
+
+
+
+  }
 
 
 }
