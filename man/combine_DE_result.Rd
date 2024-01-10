@@ -2,7 +2,7 @@
 % Please edit documentation in R/combine_DE_result.R
 \name{combine_DE_result}
 \alias{combine_DE_result}
-\title{Combine the control-dependent and -independent DE results to resolve control outlier genes}
+\title{Combine the control-dependent and -independent DE results}
 \usage{
 combine_DE_result(
   ctr_dep_DE_res,
@@ -14,25 +14,24 @@ combine_DE_result(
 )
 }
 \arguments{
-\item{statTbl}{A gene-by-condition matrix of the DE test statistic (Wald statistic) from DEseq2}
+\item{ctr_dep_DE_res}{A list of data frames that are control-dependent DE results for each condition.}
 
-\item{display}{Whether or not display the fitting of genes with heavy tails (default is FALSE)}
+\item{ctr_indep_DE_res}{A list of data frames that are control-independent DE results for each condition.}
+
+\item{libs}{A character array of library IDs.}
+
+\item{cutoffs}{A single value or a numerical array of p-outlier cutoffs}
+
+\item{gene2rmList}{A list of control outlier genes for each library, identified by \code{find_control_outliers} function.}
+
+\item{FCtype}{A string defining the column name of logFC in the DE result table. Only for internal use.}
 }
 \value{
-A list of the fitting results:
-\describe{
-\item{\code{p_mat}}{The matrix of empirical p-values (gene-by-conditions)}
-\item{\code{nulls}}{A data frame for the fitted mean and standard deviations for each gene}
-\item{\code{not_fit}}{Genes that were not fitted because the number of non-NA test statistics is fewer than 100 (theoratical null is used)}
-\item{\code{qualityMetrics}}{A list of fitting quality metrics, including the genes whose test statistic distribution is heavy tailed (these tails were trimmed prior to fitting) and number of trimmed conditions for the fitting of each gene}
-}
+A list of clean DE results with each p-outlier cutoff.
 }
 \description{
-TBD
-}
-\examples{
-data(WPS_example_data)
-result <- WPS_DE(countTable, metaDataTable)
+This function combines the DE results from both control-dependent and -independent DE analysis to resolve false positives related to control outlier genes.
+This function is for internal-use only.
 }
 \author{
 Xuhang Li

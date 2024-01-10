@@ -21,13 +21,6 @@
 #' data(example_stat_table)
 #' result <- fit_empirical_null(example_stat_table)
 
-# all non-base functions to be called by ::
-# enter the project folder
-# create function files in R
-# run devtools::document() to document the new changes
-# then run build - check
-# when done, run Git - commit - push
-
 fit_empirical_null <- function(statTbl, display = FALSE, rand_seed = 1126) {
   # display: whether or not display the fitting of data with heavy tails
   set.seed(rand_seed)

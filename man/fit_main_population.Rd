@@ -7,28 +7,24 @@
 fit_main_population(dds)
 }
 \arguments{
-\item{statTbl}{A gene-by-condition matrix of the DE test statistic (Wald statistic) from DEseq2}
-
-\item{display}{Whether or not display the fitting of genes with heavy tails (default is FALSE)}
+\item{dds}{A DESeqDataSet objective that contains the input data. When this function is used alone, the \code{dds} object should be constructed following the metadata format of WPS dataset (see examples).}
 }
 \value{
-A list of the fitting results:
-\describe{
-\item{\code{p_mat}}{The matrix of empirical p-values (gene-by-conditions)}
-\item{\code{nulls}}{A data frame for the fitted mean and standard deviations for each gene}
-\item{\code{not_fit}}{Genes that were not fitted because the number of non-NA test statistics is fewer than 100 (theoratical null is used)}
-\item{\code{qualityMetrics}}{A list of fitting quality metrics, including the genes whose test statistic distribution is heavy tailed (these tails were trimmed prior to fitting) and number of trimmed conditions for the fitting of each gene}
-}
+A matrix of fitted z-scores for each gene in each sample.
 }
 \description{
-To be updated!
+This is a wrapper function that uses \code{AdaTiSS} algorithm (Wang et al. 2021) to fit the main population of the expression levels of a gene.
+The mean and variance of this main population are used to calculate z-scores for each gene in each condition, which are further used in the control-independent
+DE analysis to remove outliers of the main population.
 }
 \examples{
-data(WPS_example_data)
-result <- WPS_DE(countTable, metaDataTable)
+data(ctr_indep_DE_example_data)
+adaZmat <- fit_main_population(dds_ori)
 }
 \references{
-This algorithm uses AdaTiSS published in Wang, Meng, Lihua Jiang, and Michael P. Snyder. "AdaTiSS: a novel data-Ada ptive robust method for identifying Ti ssue S pecificity S cores." Bioinformatics 37.23 (2021): 4469-4476.
+This function uses AdaTiSS algorithm published by Wang et al.
+
+\cite{Wang, Meng, Lihua Jiang, and Michael P. Snyder. "AdaTiSS: a novel data-Ada ptive robust method for identifying Ti ssue S pecificity S cores." Bioinformatics 37.23 (2021): 4469-4476.}
 }
 \author{
 Xuhang Li

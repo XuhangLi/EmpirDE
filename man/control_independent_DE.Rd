@@ -2,30 +2,29 @@
 % Please edit documentation in R/control_independent_DE.R
 \name{control_independent_DE}
 \alias{control_independent_DE}
-\title{Control-independent DE analysis}
+\title{Control-independent Differential Expression (DE) analysis}
 \usage{
 control_independent_DE(dds_ori, adaZmat, zcutoff = 2.5)
 }
 \arguments{
-\item{statTbl}{A gene-by-condition matrix of the DE test statistic (Wald statistic) from DEseq2}
+\item{dds_ori}{A DESeqDataSet objective that contains the input data. When this function is used alone, the \code{dds} object should be constructed following the metadata format of WPS dataset (see examples).}
 
-\item{display}{Whether or not display the fitting of genes with heavy tails (default is FALSE)}
+\item{adaZmat}{A gene-by-condition matrix of z-scores obtained through robust fitting of the main population. See \code{fit_main_population} function for details.}
+
+\item{zcutoff}{z-score cutoff to define the outlier conditions with respect to the main population.}
 }
 \value{
-A list of the fitting results:
-\describe{
-\item{\code{p_mat}}{The matrix of empirical p-values (gene-by-conditions)}
-\item{\code{nulls}}{A data frame for the fitted mean and standard deviations for each gene}
-\item{\code{not_fit}}{Genes that were not fitted because the number of non-NA test statistics is fewer than 100 (theoratical null is used)}
-\item{\code{qualityMetrics}}{A list of fitting quality metrics, including the genes whose test statistic distribution is heavy tailed (these tails were trimmed prior to fitting) and number of trimmed conditions for the fitting of each gene}
-}
+A list of DE results for each condition.
 }
 \description{
-Perform the two-pronged WPS DE analysis with an input dataset consistent with WPS data structure.
+Perform control-independent DE analysis based on a null population defined by robust fitting of the main population of each individual gene expression.
 }
 \examples{
-data(WPS_example_data)
-result <- WPS_DE(countTable, metaDataTable)
+data(ctr_indep_DE_example_data)
+result <- control_independent_DE(dds_ori, adaZmat)
+
+# To generate the z-score matrix, run:
+adaZmat <- fit_main_population(dds_ori)
 }
 \author{
 Xuhang Li

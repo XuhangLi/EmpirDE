@@ -7,13 +7,10 @@
 control_dependent_DE(dds)
 }
 \arguments{
-\item{dds}{A dds object from DEseq2}
+\item{dds}{A DESeqDataSet object defined in \code{DESeq2} package}
 }
 \value{
-A list of DE results (each element corresponds to the DE result of one condition, indexed by the condID):
-\describe{
-\item{\code{DE_table}}{The data frame containing DE results from DEseq2 for one condition.}
-}
+A list of DE results (each element corresponds to the DE result of one condition, indexed by the condID).
 }
 \description{
 This is a wrapper function to perform DE analysis in the cannonical way (control-dependent) using DEseq2.

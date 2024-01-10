@@ -1,25 +1,26 @@
 #' @title Find control-outlier genes for each library
 #'
 #' @description
-#' Perform the two-pronged WPS DE analysis with an input dataset consistent with WPS data structure.
-#' @param statTbl A gene-by-condition matrix of the DE test statistic (Wald statistic) from DEseq2
-#' @param display Whether or not display the fitting of genes with heavy tails (default is FALSE)
+#' This function identifies the control-outlier genes in each WPS library based on the results of control-dependent DE analysis.
+#' This function is only designed for internal use.
+#' @param ctr_dep_DE_res A list of control-dependent DE results
+#' @param libs A character array of library IDs in the dataset
+#' @param pcutoffs A single value or a numerical array of p-outlier cutoffs
+#' @param freqCutoff A frequency cutoff to define the core set of control outlier gene. Default is 25% of total number of libraries.
+#' @param FCtype A string defining the column name of logFC in the DE result table. Only for internal use.
 #'
-#' @return A list of the fitting results:
+#'
+#' @return A list of the control-outliers:
 #' \describe{
-#'   \item{\code{p_mat}}{The matrix of empirical p-values (gene-by-conditions)}
-#'   \item{\code{nulls}}{A data frame for the fitted mean and standard deviations for each gene}
-#'   \item{\code{not_fit}}{Genes that were not fitted because the number of non-NA test statistics is fewer than 100 (theoratical null is used)}
-#'   \item{\code{qualityMetrics}}{A list of fitting quality metrics, including the genes whose test statistic distribution is heavy tailed (these tails were trimmed prior to fitting) and number of trimmed conditions for the fitting of each gene}
+#'   \item{\code{genelist_all_cutoffs}}{A list of control outlier genes in each library. When \code{pcutoffs} has more than one values, this list is first grouped by different cutoffs and then by each library.}
+#'   \item{\code{coresetTbl}}{A data frame showing the name and frequency (i.e., appearing in # of libraries) of core control-outlier genes.}
 #' }
 #'
 #'
-#' @export WPS_DE
+#' @export
 #'
 #' @author Xuhang Li
-#' @examples
-#' data(WPS_example_data)
-#' result <- WPS_DE(countTable, metaDataTable)
+
 
 find_control_outliers <- function(ctr_dep_DE_res, libs, pcutoffs, freqCutoff, FCtype = 'log2FoldChange_raw'){
   genelist_all_cutoffs = list()

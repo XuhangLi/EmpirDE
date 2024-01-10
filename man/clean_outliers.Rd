@@ -7,25 +7,23 @@
 clean_outliers(dds, adaZmat, zcutoff, rand_seed = 19951126)
 }
 \arguments{
-\item{statTbl}{A gene-by-condition matrix of the DE test statistic (Wald statistic) from DEseq2}
+\item{dds}{a DESeqDataSet object containing the input data}
 
-\item{display}{Whether or not display the fitting of genes with heavy tails (default is FALSE)}
+\item{adaZmat}{z-score matrix corresponding to the data in \code{dds}, produced by \code{\link{fit_main_population}} function.}
+
+\item{zcutoff}{z-score cutoff to define the outliers as compared with the inlier population (main/null population).}
+
+\item{rand_seed}{random seed}
 }
 \value{
-A list of the fitting results:
+an updated DESeqDataSet objective with all outliers in the null population replaced
 \describe{
-\item{\code{p_mat}}{The matrix of empirical p-values (gene-by-conditions)}
-\item{\code{nulls}}{A data frame for the fitted mean and standard deviations for each gene}
-\item{\code{not_fit}}{Genes that were not fitted because the number of non-NA test statistics is fewer than 100 (theoratical null is used)}
-\item{\code{qualityMetrics}}{A list of fitting quality metrics, including the genes whose test statistic distribution is heavy tailed (these tails were trimmed prior to fitting) and number of trimmed conditions for the fitting of each gene}
+\item{\code{dds}}{updated \code{dds}}
 }
 }
 \description{
-To be completed
-}
-\examples{
-data(WPS_example_data)
-result <- WPS_DE(countTable, metaDataTable)
+This function uses the z-scores produced by robust main population fitting to identify the outlier conditions of each gene, and replace them with imputed inlier values.
+This is a function for internal use only.
 }
 \author{
 Xuhang Li

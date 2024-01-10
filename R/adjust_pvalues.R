@@ -1,18 +1,21 @@
-#' @title bi-directionally adjust the p-values for multiple testing
+#' @title Bi-directionally adjust p-values for multiple testing
 #'
 #' @description
-#' A wrapper function using \code{p.adjust} to adjust for multiple testing in occuring for both many genes and many testing conditions in large-scale experiments. This function is for internal use and must work with a maxExpTbl and lowExpCutoff for indepdendent filtering prior to adjustments.
+#' A wrapper function using \code{p.adjust} to adjust for multiple testing.
+#' This function simultaneously adjusts for the multiple testing of many genes in a single condition and for that of many conditions regarding the same gene.
+#' This dual adjustment scheme is designed for large-scale experiment such as WPS.
+#' The function is for internal use and must work with a maxExpTbl and lowExpCutoff for indepdendent filtering prior to adjustments.
 #' @param emp_pmat A gene-by-condition matrix of p-values to be adjusted
 #' @param maxExpTbl A gene-by-condition matrix of maximal median expression level between the control and case being contrasted in the statistical test. Used for independent filtering.
 #' @param lowExpCutoff Normalized read count cutoff for independent filtering. Default is 30.
 #'
-#' @return A list of the fitting results:
+#' @return A matrix of adjusted p-values.
 #' \describe{
-#'   \item{\code{dual_fdr_mat}}{A gene-by-condition matrix of adjusted p-values (empirical FDR). }
+#'   \item{\code{dual_fdr_mat}}{A gene-by-condition matrix of adjusted p-values (FDR). }
 #' }
 #'
 #'
-#' @export adjust_pvalues
+#' @export
 #'
 #' @author Xuhang Li
 

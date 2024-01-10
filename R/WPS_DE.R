@@ -2,15 +2,41 @@
 #'
 #' @description
 #' Perform the two-pronged WPS DE analysis with an input dataset consistent with WPS data structure.
-#' @param statTbl A gene-by-condition matrix of the DE test statistic (Wald statistic) from DEseq2
-#' @param display Whether or not display the fitting of genes with heavy tails (default is FALSE)
 #'
-#' @return A list of the fitting results:
+#' To run WPS DE analysis on custom datasets, the data should be collected over a few multiplexing libraries (or equivalent settings).
+#' WPS DE first perform both control-dependent and -independent DE analysis on each individual library, followed by identification of
+#' control-outlier genes in each library and fix such technical problem by combining with control-independent DE results. The second
+#' stage of WPS DE combines conditions in all libraries and models the test statistic distribution based empirical null. This process
+#' enventually produces the statistically rigorous FDR of each DE test.
+#'
+#' @param countTable A gene-by-sample matrix of read counts as the input dataset for DE analysis
+#' @param metaDataTable A metadata table for the input dataset with the following columns:
 #' \describe{
-#'   \item{\code{p_mat}}{The matrix of empirical p-values (gene-by-conditions)}
-#'   \item{\code{nulls}}{A data frame for the fitted mean and standard deviations for each gene}
-#'   \item{\code{not_fit}}{Genes that were not fitted because the number of non-NA test statistics is fewer than 100 (theoratical null is used)}
-#'   \item{\code{qualityMetrics}}{A list of fitting quality metrics, including the genes whose test statistic distribution is heavy tailed (these tails were trimmed prior to fitting) and number of trimmed conditions for the fitting of each gene}
+#'   \item{\code{sampleID}}{unique IDs for each sample that correspond to the column names in \code{countTable}.}
+#'   \item{\code{covTreatment}}{covariate indicating experimental treatments to be tested for (e.g., RNAi conditions). Must have a 'control' condition if control-dependent DE analysis is deisred.}
+#'   \item{\code{covBatch}}{covariate indicating experimental batches, which by default is the replicate batch. Other reasonable batch labels within each library may also be used.}
+#'   \item{\code{libID}}{unique IDs for identifying the sequencing library of each sample. WPS DE analysis is first conducted at individual sequencing library level thus this ID is used to match samples pooled in the same library.}
+#'   \item{\code{plate2}}{(optional) Logical values indicating if the sample is cultured in the second 96-well plate. This column is only needed for WPS experiments that involves plate 2 confounding effects.}
+#' }
+#' @param params Custom WPS DE paramerers (default is NULL).
+#' \describe{
+#'   \item{\code{pcutoffs}}{The p-outlier cutoff for selecting control-outlier genes. By default the value is 0.005 based on our benchmarking study. A single value or a numerical array can be supplied to titrate this parameter.}
+#'   \iten{\code{freqCutoff}}{The frequency cutoff for defining the core control-outlier genes. Default is 25 percent of the number of libraries.}
+#'   \item{\code{independentFilteringCutoff}}{A numerical read count cutoff for conducting independent filtering prior to multiple testing adjustment. This cutoff is applied to the median normalized count of the control and treatment samples in comparison. The greater median should be higher than this cutoff to be included in the final result (otherwise masked to \code{NA}). Default is set to 30 based on our benchmarking study.}
+#' }
+#'
+#' @return A list of the DE result tables for each condition. DE result table contains following columns:
+#' \describe{
+#'   \item{\code{baseMean}}{baseMean from DESeq2.}
+#'   \item{\code{log2FoldChange_raw}}{log2FoldChange from DESeq2. Adding the suffix '_raw' is to emphasize this metric is directly from DESeq2 model without applying any shrinkage algorithm.}
+#'   \item{\code{lfcSE}}{lfcSE from DESeq2.}
+#'   \item{\code{stat}}{stat from DESeq2 (Wald testing statistic)}
+#'   \item{\code{pvalue_DESeq2}}{original p-value produced by DESeq2}
+#'   \item{\code{medianCount_RNAi}}{median normalized count of samples in the treatment condition. Used in the independent filtering.}
+#'   \item{\code{medianCount_ctr}}{median normalized count of samples in the control condition. Used in the independent filtering.}
+#'   \item{\code{DE_source}}{The DE result for this gene is based on which type of DE analysis, either control-dependent (vs. control) or independent (vs. control-independent null).}
+#'   \item{\code{empirical_pvalue}}{Empirical p-values based on corrected test statistic. This is the final DE testing p-value of WPS DE framework.}
+#'   \item{\code{FDR}}{False Discovery Rate (FDR) of the DE test. This is the final DE testing FDR of WPS DE framework.}
 #' }
 #'
 #'
@@ -21,12 +47,6 @@
 #' data(WPS_example_data)
 #' result <- WPS_DE(countTable, metaDataTable)
 
-# all non-base functions to be called by ::
-# enter the project folder
-# create function files in R
-# run devtools::document() to document the new changes
-# then run build - check
-# when done, run Git - commit - push
 
 WPS_DE <- function(countTable, metaDataTable, params = NULL) {
   # all libs to analyze

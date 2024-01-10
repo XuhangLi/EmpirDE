@@ -3,15 +3,12 @@
 #' @description
 #' This is a wrapper function to perform DE analysis in the cannonical way (control-dependent) using DEseq2.
 #' This function is designed for internal use.
-#' @param dds A dds object from DEseq2
+#' @param dds A DESeqDataSet object defined in \code{DESeq2} package
 #'
-#' @return A list of DE results (each element corresponds to the DE result of one condition, indexed by the condID):
-#' \describe{
-#'   \item{\code{DE_table}}{The data frame containing DE results from DEseq2 for one condition.}
-#' }
+#' @return A list of DE results (each element corresponds to the DE result of one condition, indexed by the condID).
 #'
 #'
-#' @export control_dependent_DE
+#' @export
 #'
 #' @author Xuhang Li
 
