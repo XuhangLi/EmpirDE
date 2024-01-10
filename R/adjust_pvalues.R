@@ -30,14 +30,14 @@ adjust_pvalues <- function(emp_pmat, maxExpTbl, lowExpCutoff = 30){ # performs i
   maxExpTbl_pass = maxExpTbl > lowExpCutoff
   maxExpTbl_pass[is.na(maxExpTbl_pass)] = F
   for (j in 1:nrow(row_fdr_mat)){
-    row_fdr_mat[j,maxExpTbl_pass[j,]] = p.adjust(emp_pmat[j, maxExpTbl_pass[j,]],method = 'BH')
+    row_fdr_mat[j,maxExpTbl_pass[j,]] = stats::p.adjust(emp_pmat[j, maxExpTbl_pass[j,]],method = 'BH')
   }
   col_fdr_mat = matrix(NA, nrow = nrow(emp_pmat), ncol = ncol(emp_pmat))
   for (j in 1:ncol(col_fdr_mat)){
-    col_fdr_mat[maxExpTbl_pass[,j],j] = p.adjust(emp_pmat[maxExpTbl_pass[,j], j],method = 'BH')
+    col_fdr_mat[maxExpTbl_pass[,j],j] = stats::p.adjust(emp_pmat[maxExpTbl_pass[,j], j],method = 'BH')
   }
   dual_fdr_mat = pmax(col_fdr_mat, row_fdr_mat)
-  rownames(dual_fdr_mat) = rownames(statTbl)
-  colnames(dual_fdr_mat) = colnames(statTbl)
+  rownames(dual_fdr_mat) = rownames(emp_pmat)
+  colnames(dual_fdr_mat) = colnames(emp_pmat)
   return(dual_fdr_mat)
 }

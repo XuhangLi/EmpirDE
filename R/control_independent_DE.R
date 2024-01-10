@@ -151,5 +151,6 @@ control_independent_DE <- function(dds_ori, adaZmat, zcutoff = 2.5){
     DE_res_list[[mySample]] = res
 
   }
+  return(DE_res_list)
 }
 

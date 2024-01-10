@@ -28,7 +28,20 @@
 # then run build - check
 # when done, run Git - commit - push
 
-WPS_DE <- function(countTable, metaDataTable) {
+WPS_DE <- function(countTable, metaDataTable, params = NULL) {
+  # all libs to analyze
+  libs = unique(metaDataTable$libID)
+
+  # set parameters
+  if (is.null(params)){
+    pcutoffs = 0.005
+    freqCutoff = length(libs)*0.25
+    independentFilteringCutoff = 30
+  }else{
+    pcutoffs = params$p_out_cutoffs
+    freqCutoff = params$core_ctr_outlier_cutoff
+    independentFilteringCutoff = params$independentFilteringCutoff
+  }
 
   # make sure the counttable and meta data table are aligned
   metaDataTable = metaDataTable[match(metaDataTable$sampleID, colnames(countTable)),]
@@ -39,8 +52,8 @@ WPS_DE <- function(countTable, metaDataTable) {
   # step1: perform the control dependent and independent DE analysis
 
   cat("\033[31mStarting control-(in)dependent DE analysis per library ...\033[39m\n")
-  libs = unique(metaDataTable$libID)
   ctr_dep_DE_res = list()
+  ctr_indep_DE_res = list()
   for (i in 1:length(libs)){
     # subset to the libary being analyzed
     subsetInd = metaDataTable$libID == libs[i]
@@ -65,9 +78,13 @@ WPS_DE <- function(countTable, metaDataTable) {
     dds = estimateSizeFactors(dds)
 
     # perform control-dependent DE analysis
-    invisible(suppressMessages(DE_res_list <- control_dependent_DE(dds)))
-    names(DE_res_list) = paste(libs[i], names(DE_res_list),sep = '_')
-    ctr_dep_DE_res = c(ctr_dep_DE_res, DE_res_list)
+    libs_w_ctr = c()
+    if (any(dds$RNAi == 'control')){
+      libs_w_ctr = c(libs_w_ctr, libs[i])
+      invisible(suppressMessages(DE_res_list <- control_dependent_DE(dds)))
+      names(DE_res_list) = paste(libs[i], names(DE_res_list),sep = '_')
+      ctr_dep_DE_res = c(ctr_dep_DE_res, DE_res_list)
+    }
 
     # perform control-independent DE analysis
     cat("Performing control-independent DE analysis for library", libs[i],"\n")
@@ -75,13 +92,92 @@ WPS_DE <- function(countTable, metaDataTable) {
     invisible(suppressMessages(zMat <- fit_main_population(dds)))
     cat("Runing DEseq2 again ...\n")
     DE_res_list <- control_independent_DE(dds, zMat)
-
-
-
-
-
-
+    names(DE_res_list) = paste(libs[i], names(DE_res_list),sep = '_')
+    ctr_indep_DE_res = c(ctr_indep_DE_res, DE_res_list)
   }
 
+
+  # step2: combine the control dependent and independent DE analysis
+  cat("\033[31mCombining the two per library DE analysis...\033[39m\n")
+
+  # find the control outlier genes
+  res_list = find_control_outliers(ctr_dep_DE_res, libs_w_ctr, pcutoffs, freqCutoff) # cutoff could be calibrated by the vector like samples
+  gene2rmList = res_list[[1]]
+
+  # use control-independent DE analysis for control-outlier genes
+  clean_DE_res = combine_DE_result(ctr_dep_DE_res, ctr_indep_DE_res, libs, pcutoffs, gene2rmList)
+
+
+  # step3: perform empirical null modeling at the entire dataset level
+  cat("\033[31mCorrecting test statistics based on emprical null...\033[39m\n")
+  for (zz in 1:length(pcutoffs)){
+    allgenes = c()
+    for (i in 1:length(clean_DE_res[[paste('cutoff_',as.character(pcutoffs[zz]),sep = '')]])){
+      allgenes = union(allgenes, rownames(clean_DE_res[[paste('cutoff_',as.character(pcutoffs[zz]),sep = '')]][[i]]))
+    }
+    RNAiName = names(clean_DE_res[[paste('cutoff_',as.character(pcutoffs[zz]),sep = '')]])
+
+    # aggregate the raw tables
+    pvalueTbl = matrix(NA, nrow = length(allgenes), ncol = length(RNAiName))
+    rownames(pvalueTbl) = allgenes
+    colnames(pvalueTbl) = RNAiName
+    pvalueTbl = as.data.frame(pvalueTbl)
+
+    maxExpTbl = matrix(NA, nrow = length(allgenes), ncol = length(RNAiName))
+    rownames(maxExpTbl) = allgenes
+    colnames(maxExpTbl) = RNAiName
+    maxExpTbl = as.data.frame(maxExpTbl)
+
+    statTbl = matrix(NA, nrow = length(allgenes), ncol = length(RNAiName))
+    rownames(statTbl) = allgenes
+    colnames(statTbl) = RNAiName
+    statTbl = as.data.frame(statTbl)
+
+    for (i in 1:length(RNAiName)){
+      tbl =  clean_DE_res[[paste('cutoff_',as.character(pcutoffs[zz]),sep = '')]][[RNAiName[i]]]
+      pvalueTbl[rownames(tbl),RNAiName[i]] = tbl$pvalue
+      statTbl[rownames(tbl),RNAiName[i]] = tbl$stat
+      maxExpTbl[rownames(tbl),RNAiName[i]] = apply(tbl[,c('medianCount_RNAi','medianCount_ctr')],1,max)
+    }
+
+    # there are some data cleaning mask (ie plate2 bad genes) in pvalue field. we transfer it to all the tables
+    maxExpTbl[is.na(pvalueTbl)] = NA
+    statTbl[is.na(pvalueTbl)] = NA
+    # we remove genes without DE analysis output
+    ind = matrixStats::rowAlls(is.na(pvalueTbl))
+    statTbl = statTbl[!ind,]
+    pvalueTbl = pvalueTbl[!ind,]
+    maxExpTbl = maxExpTbl[!ind,]
+
+    # fit the empirical null
+    fit = fit_empirical_null(statTbl,display = F)
+
+    # perform independent filtering and bi-directional p-adjustment
+    p_adj_WPS = adjust_pvalues(emp_pmat = fit$p_mat,
+                               maxExpTbl = maxExpTbl,
+                               lowExpCutoff = independentFilteringCutoff)
+
+
+    # update the DE tbls
+    for (i in 1:length(RNAiName)){
+      clean_DE_res[[paste('cutoff_',as.character(pcutoffs[zz]),sep = '')]][[RNAiName[i]]]$empirical_pvalue =
+                                      fit$p_mat[rownames(clean_DE_res[[paste('cutoff_',as.character(pcutoffs[zz]),sep = '')]][[RNAiName[i]]]),
+                                                  RNAiName[i]]
+      clean_DE_res[[paste('cutoff_',as.character(pcutoffs[zz]),sep = '')]][[RNAiName[i]]]$FDR =
+                                      p_adj_WPS[rownames(clean_DE_res[[paste('cutoff_',as.character(pcutoffs[zz]),sep = '')]][[RNAiName[i]]]),
+                                                  RNAiName[i]]
+      # rename the p-values produced by DEseq2
+      colnames(clean_DE_res[[paste('cutoff_',as.character(pcutoffs[zz]),sep = '')]][[RNAiName[i]]])[5] = 'pvalue_DESeq2'
+      # remove the padj column
+      clean_DE_res[[paste('cutoff_',as.character(pcutoffs[zz]),sep = '')]][[RNAiName[i]]] =  clean_DE_res[[paste('cutoff_',as.character(pcutoffs[zz]),sep = '')]][[RNAiName[i]]][,-6]
+    }
+  }
+
+  # final clean up
+  if (length(pcutoffs) == 1){
+    clean_DE_res = clean_DE_res[[1]]
+  }
+
+  return(clean_DE_res)
 
 }

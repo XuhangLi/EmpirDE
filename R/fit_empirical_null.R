@@ -28,16 +28,26 @@
 # then run build - check
 # when done, run Git - commit - push
 
-fit_empirical_null <- function(statTbl, display = FALSE) {
+fit_empirical_null <- function(statTbl, display = FALSE, rand_seed = 1126) {
   # display: whether or not display the fitting of data with heavy tails
+  set.seed(rand_seed)
 
-  library(locfdr)
   # we require 100 observation to calculate the empirical null
-  keep = (rowSums(!is.na(statTbl)) >= 100)
-  ther_null_genes = rownames(statTbl)[!keep]
+  if (stats::quantile(rowSums(!is.na(statTbl)), 0.1) < 100){
+    cat("\033[31mCAUTION: Most genes were not detected in more than 100 conditions!\033[39m\n")
+    fil_cutoff = min(c(ncol(statTbl) * 0.9, 100))
+    cat('Filtering at minimal',round(fil_cutoff),'conditions ...\n')
+    keep = (rowSums(!is.na(statTbl)) >= fil_cutoff)
+    ther_null_genes = rownames(statTbl)[!keep]
+  }else{
+    keep = (rowSums(!is.na(statTbl)) >= 100)
+    ther_null_genes = rownames(statTbl)[!keep]
+  }
 
   # empirical null modeling based on Efron's implementation
   emp_pmat = matrix(NA, nrow = nrow(statTbl), ncol = ncol(statTbl))
+  colnames(emp_pmat) = colnames(statTbl)
+  rownames(emp_pmat) = rownames(statTbl)
 
   compromisedInd = c()
   ntrim = c()
@@ -56,9 +66,9 @@ fit_empirical_null <- function(statTbl, display = FALSE) {
       # always exclude extreme discrete outliers to avoid bugs
 
       # define outlier by 3MAD deviation from 1/99% quantile
-      qts = quantile(data, c(0.01,0.99))
-      upper_loose = qts[2] + 3*mad(data)
-      lower_loose = qts[1] - 3*mad(data)
+      qts = stats::quantile(data, c(0.01,0.99))
+      upper_loose = qts[2] + 3*stats::mad(data)
+      lower_loose = qts[1] - 3*stats::mad(data)
 
       # trimming outliers
       trimInd = data > lower_loose & data < upper_loose
@@ -78,42 +88,44 @@ fit_empirical_null <- function(statTbl, display = FALSE) {
 
       success = FALSE
       step = 0
-      while(!success & step < 100){
-        fit = try({lfdr_model_trim = locfdr(data_trim, bre = brk,plot = showplot, type = 0)},silent = T)
-        if (class(fit) == 'try-error'){
-          brk = brk + 1
-          step = step + 1
-        }else{
-          f0_mean = lfdr_model_trim$fp0['mlest','delta']
-          f0_sd = lfdr_model_trim$fp0['mlest','sigma']
-          emp_mean = c(emp_mean, f0_mean)
-          emp_sd = c(emp_sd, f0_sd)
-          emp_ind = c(emp_ind, i)
+      suppressWarnings({
+        while(!success & step < 100){
+          fit = try({lfdr_model_trim = locfdr::locfdr(data_trim, bre = brk,plot = showplot, type = 0)},silent = T)
+          if (class(fit) == 'try-error'){
+            brk = brk + 1
+            step = step + 1
+          }else{
+            f0_mean = lfdr_model_trim$fp0['mlest','delta']
+            f0_sd = lfdr_model_trim$fp0['mlest','sigma']
+            emp_mean = c(emp_mean, f0_mean)
+            emp_sd = c(emp_sd, f0_sd)
+            emp_ind = c(emp_ind, i)
 
-          # calculate empirical pvalue
-          lowerT = pnorm(data, mean = f0_mean, sd = f0_sd, lower.tail = TRUE, log.p = FALSE)
-          upperT = pnorm(data, mean = f0_mean, sd = f0_sd, lower.tail = FALSE, log.p = FALSE)
-          p_data = rowMins(cbind(lowerT, upperT)) * 2
+            # calculate empirical pvalue
+            lowerT = stats::pnorm(data, mean = f0_mean, sd = f0_sd, lower.tail = TRUE, log.p = FALSE)
+            upperT = stats::pnorm(data, mean = f0_mean, sd = f0_sd, lower.tail = FALSE, log.p = FALSE)
+            p_data = matrixStats::rowMins(cbind(lowerT, upperT)) * 2
 
-          success = TRUE
+            success = TRUE
+          }
         }
-      }
+      })
       if (step == 100){
         print(paste('maximum break tuning step reaches, using median/mad ... ',rownames(statTbl)[i]))
         # the fitting is failed. we do some compromise
         # we use median and mad as best guess of empirical null
-        f0_mean = median(data_trim)
-        f0_sd = mad(data_trim)
+        f0_mean = stats::median(data_trim)
+        f0_sd = stats::mad(data_trim)
         emp_mean = c(emp_mean, f0_mean)
         emp_sd = c(emp_sd, f0_sd)
         emp_ind = c(emp_ind, i)
         # empirical pvalue
-        lowerT = pnorm(data, mean = f0_mean, sd = f0_sd, lower.tail = TRUE, log.p = FALSE)
-        upperT = pnorm(data, mean = f0_mean, sd = f0_sd, lower.tail = FALSE, log.p = FALSE)
-        emp_pmat[i,nonNAid] = rowMins(cbind(lowerT, upperT)) * 2
+        lowerT = stats::pnorm(data, mean = f0_mean, sd = f0_sd, lower.tail = TRUE, log.p = FALSE)
+        upperT = stats::pnorm(data, mean = f0_mean, sd = f0_sd, lower.tail = FALSE, log.p = FALSE)
+        emp_pmat[i,nonNAid] = matrixStats::rowMins(cbind(lowerT, upperT)) * 2
         if (display){
-          hist(data_trim)
-          curve(length(data_trim) * dnorm(x, f0_mean, f0_sd), add=TRUE, col="red", lwd=2)
+          graphics::hist(data_trim)
+          graphics::curve(length(data_trim) * stats::dnorm(x, f0_mean, f0_sd), add=TRUE, col="red", lwd=2)
         }
       }else{
         emp_pmat[i,nonNAid] = p_data
@@ -123,9 +135,9 @@ fit_empirical_null <- function(statTbl, display = FALSE) {
       f0_sd = 1
       data_trim = as.numeric(statTbl[i,])
       # empirical pvalue
-      lowerT = pnorm(data_trim, mean = f0_mean, sd = f0_sd, lower.tail = TRUE, log.p = FALSE)
-      upperT = pnorm(data_trim, mean = f0_mean, sd = f0_sd, lower.tail = FALSE, log.p = FALSE)
-      emp_pmat[i,] = rowMins(cbind(lowerT, upperT)) * 2
+      lowerT = stats::pnorm(data_trim, mean = f0_mean, sd = f0_sd, lower.tail = TRUE, log.p = FALSE)
+      upperT = stats::pnorm(data_trim, mean = f0_mean, sd = f0_sd, lower.tail = FALSE, log.p = FALSE)
+      emp_pmat[i,] = matrixStats::rowMins(cbind(lowerT, upperT)) * 2
     }
     if (i %% 100 == 0){
       print(paste('fitting #',i,' gene.',sep = ''))
