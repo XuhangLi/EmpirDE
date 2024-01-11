@@ -4,14 +4,16 @@
 Please note that we are still actively developing this package. Please contact us if you see any issues!
 ------------------------------------------------------------------------
 
-The R package **wpsDE** is Differentially Expression (DE) analysis tool following the two-pronged DE analysis framework using empirical null,developed as part of the Worm Perturb-seq (WPS) technology. wpsDE effectively identifies differentially expressed genes in large-scale transcriptomes dataset (i.e., > 100 conditions) by leveraging the many conditions profiled in parallel to rigorously control false discovery rate. Although this package was developed to support WPS data analysis, it is generally applicable to other similar large-scale transcriptomes data where many conditions are profiled together. <span style="color:blue"> **For WPS users, following the [WPS computational analysis protocol](https://TBD) for seamless analysis **</span>. The following illustration figure summarizes the two stages of wpsDE framework:
+The R package **wpsDE** is Differentially Expression (DE) analysis tool following the two-pronged DE analysis framework using empirical null,developed as part of the Worm Perturb-seq (WPS) technology. wpsDE effectively identifies differentially expressed genes in large-scale transcriptomes dataset (i.e., > 100 conditions) by leveraging the many conditions profiled in parallel to rigorously control false discovery rate. Although this package was developed to support WPS data analysis, it is generally applicable to other similar large-scale transcriptomes data where many conditions are profiled together. The following illustration figure summarizes the two stages of wpsDE framework:
 
 <img src="man/figures/GitHub.png" width="600"/>
 
 
+For WPS users, following the <span style="color:blue"> [WPS computational analysis protocol](https://TBD) for seamless analysis.
+
 To find out more details about **wpsDE**, please read our manuscript:
 
-[Title and authors](bioRxiv link)
+[Title and authors](https://bioRxiv_link)
 
 This introduction page provides a quick tutorial for running **wpsDE** on standard WPS dataset or a custom dataset with many conditions. 
 
