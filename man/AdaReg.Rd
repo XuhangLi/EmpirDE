@@ -24,6 +24,10 @@ AdaReg(
 
 \item{var.gp.id}{A vector of groups indicating the samples in the same variance group (default: all the samples have the same variance).}
 
+\item{mu.fix.value}{Undocumented parameter by the original authors of AdaReg. Skip documentation here.}
+
+\item{var.fix.value}{Undocumented parameter by the original authors of AdaReg. Skip documentation here.}
+
 \item{tol}{Tolerance for interations (default: 10^(-4)).}
 
 \item{step}{Step limit (default: 50).}
@@ -33,6 +37,9 @@ Estimated coef and variance, and fitting info for the residuals.
 }
 \description{
 To robustly estimate linear regression coefficients and detect outliers.
+}
+\note{
+Code edited by Xuhang Li to avoid global functions and package building errors.
 }
 \author{
 Meng Wang

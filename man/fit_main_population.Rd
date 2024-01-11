@@ -18,8 +18,8 @@ The mean and variance of this main population are used to calculate z-scores for
 DE analysis to remove outliers of the main population.
 }
 \examples{
-data(ctr_indep_DE_example_data)
-adaZmat <- fit_main_population(dds_ori)
+data(example_dds)
+adaZmat <- fit_main_population(example_dds)
 }
 \references{
 This function uses AdaTiSS algorithm published by Wang et al.

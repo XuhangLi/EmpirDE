@@ -17,8 +17,8 @@
 #'
 #' \cite{Wang, Meng, Lihua Jiang, and Michael P. Snyder. "AdaTiSS: a novel data-Ada ptive robust method for identifying Ti ssue S pecificity S cores." Bioinformatics 37.23 (2021): 4469-4476.}
 #' @examples
-#' data(ctr_indep_DE_example_data)
-#' adaZmat <- fit_main_population(dds_ori)
+#' data(example_dds)
+#' adaZmat <- fit_main_population(example_dds)
 
 fit_main_population <- function(dds){
 
@@ -26,7 +26,7 @@ fit_main_population <- function(dds){
   tmp = DESeq2::counts(dds, normalized=TRUE)
   normCounts = log2(tmp + 1)
   # remove batch effects in replicates
-  normCounts_clean <- limma::removeBatchEffect(normCounts, batch = dds$batchLabel,design= model.matrix(~ dds$RNAi))
+  normCounts_clean <- limma::removeBatchEffect(normCounts, batch = dds$batchLabel,design= stats::model.matrix(~ dds$RNAi))
 
   # fit AdaTiss for every gene
   zMat = matrix(NA,nrow = nrow(normCounts_clean),ncol = ncol(normCounts_clean))
@@ -36,7 +36,7 @@ fit_main_population <- function(dds){
   case2 = c()
   for (i in 1:nrow(normCounts_clean)){
     y = normCounts_clean[i,]
-    out = AdaReg(model.matrix(~1,data = as.data.frame(y)), y)
+    out = AdaReg(stats::model.matrix(~1,data = as.data.frame(y)), y)
     pi0 = as.numeric(out$res.info['pi0.hat'])
     if (pi0 >= 0.7){# data fitted well on the main population (>70% inlier)
       zr1 = (y-out$beta.rob.fit)/sqrt(out$var.sig.gp.fit)
@@ -49,15 +49,15 @@ fit_main_population <- function(dds){
       # we found median of 10 is sufficient to filter out those lowly expressed ones, so
       # when expression is low (median <= 10), we consider the poor fitting as result of high variation, so we use mean for conservative
       # when expression is high (median > 10), we consider the poor fitting as result of high responses, so we use median for best power
-      if (median(y) <= log2(10+1)){
+      if (stats::median(y) <= log2(10+1)){
         meanIn = mean(y)
-        sdIn = sd(y)
+        sdIn = stats::sd(y)
         zr1 = (y-meanIn)/sdIn
         zMat[i,] = zr1
         case2 = c(case2,i)
       }else{
-        meanIn = median(y)
-        sdIn = mad(y)
+        meanIn = stats::median(y)
+        sdIn = stats::mad(y)
         zr1 = (y-meanIn)/sdIn
         zMat[i,] = zr1
         case2 = c(case2,i)
@@ -66,7 +66,7 @@ fit_main_population <- function(dds){
     }
 
     if (i %% 1000 == 0){
-      print(paste('AdaTiss fitting for ',lib, ' ... ', 100*i/nrow(zMat),'%',sep = ''))
+      print(paste('AdaTiss fitting', ' ... ', 100*i/nrow(zMat),'% (this may take a long time)',sep = ''))
       print(paste('normal fit: ',length(case1)/i,sep = ''))
       print(paste('poor fit: ',length(case2)/i,sep = ''))
     }

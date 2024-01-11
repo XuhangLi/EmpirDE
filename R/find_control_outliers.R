@@ -17,7 +17,6 @@
 #' }
 #'
 #'
-#' @export
 #'
 #' @author Xuhang Li
 
@@ -40,7 +39,7 @@ find_control_outliers <- function(ctr_dep_DE_res, libs, pcutoffs, freqCutoff, FC
       tmp = ctr_dep_DE_res[[thisRNAi]]
       tbl[rownames(tmp),thisRNAi] = -log10(tmp$pvalue) * sign(tmp[,FCtype])
     }
-    Qs = rowQuantiles(x = as.matrix(tbl),probs = c(0.75,0.5,0.25), na.rm = T)
+    Qs = matrixStats::rowQuantiles(x = as.matrix(tbl),probs = c(0.75,0.5,0.25), na.rm = T)
     upperQ = Qs[,1]
     midQ = Qs[,2]
     lowerQ = Qs[,3]

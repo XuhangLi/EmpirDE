@@ -20,11 +20,9 @@ A list of DE results for each condition.
 Perform control-independent DE analysis based on a null population defined by robust fitting of the main population of each individual gene expression.
 }
 \examples{
-data(ctr_indep_DE_example_data)
-result <- control_independent_DE(dds_ori, adaZmat)
-
-# To generate the z-score matrix, run:
-adaZmat <- fit_main_population(dds_ori)
+data(example_dds)
+adaZmat <- fit_main_population(example_dds)
+result <- control_independent_DE(example_dds, adaZmat)
 }
 \author{
 Xuhang Li

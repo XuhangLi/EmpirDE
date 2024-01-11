@@ -12,12 +12,9 @@
 #'
 #' @author Xuhang Li
 #' @examples
-#' data(ctr_indep_DE_example_data)
-#' result <- control_independent_DE(dds_ori, adaZmat)
-#'
-#' # To generate the z-score matrix, run:
-#' adaZmat <- fit_main_population(dds_ori)
-
+#' data(example_dds)
+#' adaZmat <- fit_main_population(example_dds)
+#' result <- control_independent_DE(example_dds, adaZmat)
 
 
 control_independent_DE <- function(dds_ori, adaZmat, zcutoff = 2.5){
@@ -78,7 +75,7 @@ control_independent_DE <- function(dds_ori, adaZmat, zcutoff = 2.5){
     dds <- clean_outliers(dds, adaZmat, zcutoff)
 
     # removing outliers may reveal some actually lowly expressed genes, so refiltering low counts
-    keep <- rowSums(counts(dds)>=10) >= 1
+    keep <- rowSums(DESeq2::counts(dds)>=10) >= 1
     dds <- dds[keep,]
 
     # run DEseq2
@@ -97,10 +94,10 @@ control_independent_DE <- function(dds_ori, adaZmat, zcutoff = 2.5){
         mySample2 = paste('RNAi_control_vs_others',sep = '')
         mySample = mySample1
 
-        res1 <- results(dds.filt,name = stringr::str_replace_all(mySample1,'-','.'),independentFiltering = F)
+        res1 <- DESeq2::results(dds.filt,name = stringr::str_replace_all(mySample1,'-','.'),independentFiltering = F)
         colnames(res1)[2] = 'log2FoldChange_raw'
 
-        res2 <- results(dds.filt,name = stringr::str_replace_all(mySample2,'-','.'),independentFiltering = F)
+        res2 <- DESeq2::results(dds.filt,name = stringr::str_replace_all(mySample2,'-','.'),independentFiltering = F)
         colnames(res2)[2] = 'log2FoldChange_raw'
 
         # filter out the case where the FC direction of vector (when significant) is the same as target RNAi (confounded)
@@ -132,7 +129,7 @@ control_independent_DE <- function(dds_ori, adaZmat, zcutoff = 2.5){
     if (!special_case){
       # define the contrast
       mySample = paste('RNAi_',targetGene,'_vs_others',sep = '')
-      res <- results(dds.filt,name = stringr::str_replace_all(mySample,'-','.'),independentFiltering = F)
+      res <- DESeq2::results(dds.filt,name = stringr::str_replace_all(mySample,'-','.'),independentFiltering = F)
       colnames(res)[2] = 'log2FoldChange_raw'
 
       # attach the counts information

@@ -8,7 +8,6 @@
 #' @return A list of DE results (each element corresponds to the DE result of one condition, indexed by the condID).
 #'
 #'
-#' @export
 #'
 #' @author Xuhang Li
 
@@ -26,7 +25,7 @@ control_dependent_DE <- function(dds) {
 
     # custom filtering setup
     dds.filt = dds
-    res <- results(dds.filt,name = stringr::str_replace_all(mySample,'-','.'),independentFiltering = F) # turning off independent filtering and will impose it later on manually
+    res <- DESeq2::results(dds.filt,name = stringr::str_replace_all(mySample,'-','.'),independentFiltering = F) # turning off independent filtering and will impose it later on manually
     # in WPS DE, we used the simple FC estimates from GLM instead of shrunk FC that is often used in standard DE analysis
     # this is because WPS DE controls FDR through empirical null modeling, leaving the FC shrinkage unnecessary.
     # stat = res$stat
@@ -38,9 +37,9 @@ control_dependent_DE <- function(dds) {
     colnames(res)[2] = 'log2FoldChange_raw'
 
     # calculate the median normalized counts for treatments and controls
-    mVals1 = rowMedians(counts(dds.filt, normalized=TRUE)[,dds.filt$RNAi == targetGene])
+    mVals1 = matrixStats::rowMedians(DESeq2::counts(dds.filt, normalized=TRUE)[,dds.filt$RNAi == targetGene])
     names(mVals1) = rownames(dds.filt)
-    mVals2 = rowMedians(counts(dds.filt, normalized=TRUE)[,dds.filt$RNAi == 'control'])
+    mVals2 = matrixStats::rowMedians(DESeq2::counts(dds.filt, normalized=TRUE)[,dds.filt$RNAi == 'control'])
     names(mVals2) = rownames(dds.filt)
     res = as.data.frame(res)
     res$medianCount_RNAi = mVals1[rownames(res)]

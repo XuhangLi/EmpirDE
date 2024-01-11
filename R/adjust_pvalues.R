@@ -15,8 +15,6 @@
 #' }
 #'
 #'
-#' @export
-#'
 #' @author Xuhang Li
 
 

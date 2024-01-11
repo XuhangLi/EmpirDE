@@ -21,7 +21,7 @@ WPS_DE(countTable, metaDataTable, params = NULL)
 \item{params}{Custom WPS DE paramerers (default is NULL).
 \describe{
 \item{\code{pcutoffs}}{The p-outlier cutoff for selecting control-outlier genes. By default the value is 0.005 based on our benchmarking study. A single value or a numerical array can be supplied to titrate this parameter.}
-\iten{\code{freqCutoff}}{The frequency cutoff for defining the core control-outlier genes. Default is 25 percent of the number of libraries.}
+\item{\code{freqCutoff}}{The frequency cutoff for defining the core control-outlier genes. Default is 25 percent of the number of libraries.}
 \item{\code{independentFilteringCutoff}}{A numerical read count cutoff for conducting independent filtering prior to multiple testing adjustment. This cutoff is applied to the median normalized count of the control and treatment samples in comparison. The greater median should be higher than this cutoff to be included in the final result (otherwise masked to \code{NA}). Default is set to 30 based on our benchmarking study.}
 }}
 }
@@ -50,7 +50,8 @@ stage of WPS DE combines conditions in all libraries and models the test statist
 enventually produces the statistically rigorous FDR of each DE test.
 }
 \examples{
-data(WPS_example_data)
+data("countTable")
+data("metaDataTable")
 result <- WPS_DE(countTable, metaDataTable)
 }
 \author{

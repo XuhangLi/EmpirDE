@@ -13,8 +13,6 @@
 #' @return A list of clean DE results with each p-outlier cutoff.
 #'
 #'
-#' @export
-#'
 #' @author Xuhang Li
 
 combine_DE_result <- function(ctr_dep_DE_res, ctr_indep_DE_res, libs, cutoffs,gene2rmList, FCtype = 'log2FoldChange_raw'){

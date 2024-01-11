@@ -10,6 +10,8 @@ fit_empirical_null(statTbl, display = FALSE, rand_seed = 1126)
 \item{statTbl}{A gene-by-condition matrix of the DE test statistic (Wald statistic) from DEseq2}
 
 \item{display}{Whether or not display the fitting of genes with heavy tails (default is FALSE)}
+
+\item{rand_seed}{random seed}
 }
 \value{
 A list of the fitting results:

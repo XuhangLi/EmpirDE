@@ -1,12 +1,13 @@
 Package: wpsDE
-Title: What the Package Does (One Line, Title Case)
-Version: 0.99.0
+Title: Worm Perturb-seq DE: Two-pronged Empirical Null Based Differential Expression Analysis
+Version: 0.0.1
 Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
+    person("Xuhang", "Li", , "xuhang.li@umassmed.edu", role = c("aut", "cre"),
+           comment = c(ORCID = "0000-0001-6071-9605"))
+Description: This package performs the two-pronged differential expression (DE) analysis used in the Worm Perturb-seq (WPS) technology. This WPS DE framework uses the concept of empirical null to robustly identify differentially expressed genes based on a large-scale RNA-seq dataset. The framework is not restricted to analyzing WPS data but also applicable to similar dataset with large number of conditions profiled.
 License: MIT + file LICENSE
 Encoding: UTF-8
+Depends: R (>= 3.5.0)
 Imports:
         DESeq2,
         limma,

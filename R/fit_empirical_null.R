@@ -1,9 +1,11 @@
+utils::globalVariables(c("x"))
 #' @title Fit the empirical null of DE test statistics
 #'
 #' @description
 #' Fit the gene-by-gene empricial null distribution using an input test statistic matrix
 #' @param statTbl A gene-by-condition matrix of the DE test statistic (Wald statistic) from DEseq2
 #' @param display Whether or not display the fitting of genes with heavy tails (default is FALSE)
+#' @param rand_seed random seed
 #'
 #' @return A list of the fitting results:
 #' \describe{
