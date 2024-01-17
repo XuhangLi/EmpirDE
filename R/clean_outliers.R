@@ -51,6 +51,7 @@ clean_outliers <- function(dds, adaZmat, zcutoff, rand_seed = 19951126){
   newCounts_tmp = newCounts[,colnames(normCounts_imp)]
   NAidx = which(is.na(newCounts_tmp))
   # bootstrap impute (sampling within batch)
+  warningflag = F
   for (i in 1:nrow(normCounts_imp)){
     if (any(is.na(normCounts_imp[i,]))){
       tmp = normCounts_imp[i,]
@@ -59,9 +60,17 @@ clean_outliers <- function(dds, adaZmat, zcutoff, rand_seed = 19951126){
       tmp = tmp[!is.na(tmp)]
       reps2 = as.character(SummarizedExperiment::colData(dds)[names(tmp),'batchLabel'])
       for (rep in unique(reps)){
-        normCounts_imp[i,naInds[reps == rep]] = as.numeric(sample(tmp[reps2==rep],sum(reps == rep),replace = T))
+        if (any(reps2 == rep)){
+          normCounts_imp[i,naInds[reps == rep]] = as.numeric(sample(tmp[reps2==rep],sum(reps == rep),replace = T))
+        }else{# this full batch needs imputation, so ignore bacthes
+          normCounts_imp[i,naInds[reps == rep]] = as.numeric(sample(tmp,sum(reps == rep),replace = T))
+          warningflag = T
+        }
       }
     }
+  }
+  if(warningflag){
+    cat("\033[31mWarning: bootstrap imputation was compromised in some conditions because there are batch(es) with too few samples!\033[39m\n")
   }
   sizeF = DESeq2::sizeFactors(dds)[colnames(normCounts_imp)]
   sizeFmat = matrix(rep(sizeF,each=nrow(normCounts_imp)),nrow=nrow(normCounts_imp))
