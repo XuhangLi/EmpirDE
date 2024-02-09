@@ -29,6 +29,9 @@ This introduction page provides a quick tutorial for running **wpsDE** on standa
 To install the development version from GitHub, please run:
 
 ``` r
+if (!require("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+BiocManager::install(version = "3.18")
 if (!require("devtools", quietly = TRUE))
     install.packages("devtools")
 devtools::install_github("XuhangLi/wpsDE")
