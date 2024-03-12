@@ -35,10 +35,21 @@ control_independent_DE <- function(dds_ori, adaZmat, zcutoff = 2.5){
     if ('plate2' %in% names(SummarizedExperiment::colData(dds))){
       # Special treatment for plate2 sample - skipped for non-WPS data
       isPlate2 = unique(dds$plate2[dds$RNAi == targetGene])
+      if (any(dds$RNAi %in% 'control')){
+        isVectorPlate2 = unique(dds$plate2[dds$RNAi == 'control'])
+        if (length(isVectorPlate2) > 1){
+          stop(paste('The plate2 annotation is not consistent within vector control condition'))
+        }
+        if (!isVectorPlate2 & isPlate2){
+          cat("\033[31mWarning: Plate2 RNAi detected but vector controls are not in plate2. Plate2 confounding cannot be resolved and DEGs result may be unreliable!\033[39m\n")
+        }
+      }else{
+        isVectorPlate2 = FALSE
+      }
       if (length(isPlate2) > 1){
         stop(paste('The plate2 annotation is not consistent within condition', targetGene))
       }
-      if (isPlate2){
+      if (isPlate2 & isVectorPlate2){
         dds_tmp = dds
         dds_tmp$RNAi_ori = dds_tmp$RNAi
         dds_tmp$RNAi = factor(as.character(dds_tmp$RNAi), levels = c('others',levels(dds_tmp$RNAi)))
@@ -86,7 +97,7 @@ control_independent_DE <- function(dds_ori, adaZmat, zcutoff = 2.5){
     # Special treatment for plate2 sample - skipped for non-WPS data
     special_case = F
     if ('plate2' %in% names(SummarizedExperiment::colData(dds))){
-      if (isPlate2 & any(dds.filt$RNAi %in% 'control')){# control exist and it is a plate2 confounded RNAi
+      if (isPlate2 & any(dds.filt$RNAi %in% 'control') & isVectorPlate2){# control exist (in plate2) and it is a plate2 confounded RNAi
         cat("\033[31mWPS DATA: detected fully confounded plate2 RNAi, filtering uncertain results to be conservative!\033[39m\n")
         special_case = T
         # define contrast - we look at two types
