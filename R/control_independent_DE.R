@@ -82,6 +82,12 @@ control_independent_DE <- function(dds_ori, adaZmat, zcutoff = 2.5){
       dds <- dds_tmp
     }
 
+    # since some samples (eg controls) are removed, let's refilter before proceeding
+    keep <- rowSums(DESeq2::counts(dds)>=10) >= 1
+    dds <- dds[keep,]
+    # update size factors
+    dds = DESeq2::estimateSizeFactors(dds)
+
     # clean up the outliers
     dds <- clean_outliers(dds, adaZmat, zcutoff)
 

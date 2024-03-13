@@ -20,6 +20,8 @@
 
 clean_outliers <- function(dds, adaZmat, zcutoff, rand_seed = 19951126){
 
+  adaZmat =  adaZmat[rownames(dds), colnames(dds)]
+
   # first, find out the genes and samples to be replaced
   RNAi_others = unique(as.character(dds$RNAi_ori[dds$RNAi == 'others']))
   aveZmat = data.frame(row.names = rownames(dds))
@@ -52,13 +54,14 @@ clean_outliers <- function(dds, adaZmat, zcutoff, rand_seed = 19951126){
   NAidx = which(is.na(newCounts_tmp))
   # bootstrap impute (sampling within batch)
   warningflag = F
+  mycolData = SummarizedExperiment::colData(dds)
   for (i in 1:nrow(normCounts_imp)){
     if (any(is.na(normCounts_imp[i,]))){
       tmp = normCounts_imp[i,]
       naInds = which(as.logical(is.na(tmp)))
-      reps = as.character(SummarizedExperiment::colData(dds)[names(tmp)[naInds],'batchLabel'])
+      reps = as.character(mycolData[names(tmp)[naInds],'batchLabel'])
       tmp = tmp[!is.na(tmp)]
-      reps2 = as.character(SummarizedExperiment::colData(dds)[names(tmp),'batchLabel'])
+      reps2 = as.character(mycolData[names(tmp),'batchLabel'])
       for (rep in unique(reps)){
         if (any(reps2 == rep)){
           normCounts_imp[i,naInds[reps == rep]] = as.numeric(sample(tmp[reps2==rep],sum(reps == rep),replace = T))
