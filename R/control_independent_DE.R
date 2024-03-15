@@ -64,13 +64,19 @@ control_independent_DE <- function(dds_ori, adaZmat, zcutoff = 2.5){
         dds_tmp$RNAi_ori = dds_tmp$RNAi
         dds_tmp$RNAi = factor(as.character(dds_tmp$RNAi), levels = c('others',levels(dds_tmp$RNAi)))
         dds_tmp$RNAi[!(dds_tmp$RNAi %in% c('control',targetGene))] = 'others'
-        # remove all plate2 confounding samples (by default, control samples are plate2)
-        rmInd = (dds_tmp$RNAi %in% 'control') | (dds_tmp$RNAi %in% 'others' & dds$plate2)
+        # remove all plate2 confounding samples (by default, control samples are plate2; otherwise warning user)
+        if (isVectorPlate2){
+          rmInd = (dds_tmp$RNAi %in% 'control') | (dds_tmp$RNAi %in% 'others' & dds$plate2)
+        }else{
+          cat("\033[31mWarning: detected vector control NOT in plate2. Make sure this is true! If you want to exclude vector controls in the control-independent DE analysis, you can set vector controls to plate 2. \033[39m\n")
+          rmInd = (dds_tmp$RNAi %in% 'others' & dds$plate2)
+        }
         dds_tmp = dds_tmp[,!rmInd]
         dds_tmp$RNAi = factor(as.character(dds_tmp$RNAi), levels = c('others',targetGene))
         dds <- dds_tmp
       }
     }else{ # for non-WPS data, we remove controls (as control-independent DE is for control-outlier genes)
+      cat("\033[31mNotice: no bacteria plate information found. Excluding vector control samples by default...\033[39m\n")
       dds_tmp = dds
       dds_tmp$RNAi_ori = dds_tmp$RNAi
       dds_tmp$RNAi = factor(as.character(dds_tmp$RNAi), levels = c('others',levels(dds_tmp$RNAi)))

@@ -1,6 +1,6 @@
 Package: wpsDE
 Title: Worm Perturb-seq DE: Two-pronged Empirical Null Based Differential Expression Analysis
-Version: 0.0.1
+Version: 0.9.9
 Authors@R: 
     person("Xuhang", "Li", , "xuhang.li@umassmed.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-6071-9605"))
