@@ -1,12 +1,12 @@
-#' @title WPS Differential Expression (DE) analysis
+#' @title Empirical Differential Expression (DE) analysis
 #'
 #' @description
-#' Perform the two-pronged WPS DE analysis with an input dataset consistent with WPS data structure.
+#' Perform the two-pronged empirical DE analysis with an input dataset consistent with Worm Perturb-seq (WPS) data structure.
 #'
-#' To run WPS DE analysis on custom datasets, the data should be collected over a few multiplexing libraries (or equivalent settings).
-#' WPS DE first perform both control-dependent and -independent DE analysis on each individual library, followed by identification of
+#' To run EmpirDE analysis on custom datasets, the data should be collected over a few multiplexing libraries (or equivalent settings).
+#' EmpirDE first perform both control-dependent and -independent DE analysis on each individual library, followed by identification of
 #' control-outlier genes in each library and fix such technical problem by combining with control-independent DE results. The second
-#' stage of WPS DE combines conditions in all libraries and models the test statistic distribution based empirical null. This process
+#' stage of EmpirDE combines conditions in all libraries and models the test statistic distribution based empirical null. This process
 #' enventually produces the statistically rigorous FDR of each DE test.
 #'
 #' @param countTable A gene-by-sample matrix of read counts as the input dataset for DE analysis
@@ -15,10 +15,10 @@
 #'   \item{\code{sampleID}}{unique IDs for each sample that correspond to the column names in \code{countTable}.}
 #'   \item{\code{covTreatment}}{covariate indicating experimental treatments to be tested for (e.g., RNAi conditions). Must have a 'control' condition if control-dependent DE analysis is deisred.}
 #'   \item{\code{covBatch}}{covariate indicating experimental batches, which by default is the replicate batch. Other reasonable batch labels within each library may also be used.}
-#'   \item{\code{libID}}{unique IDs for identifying the sequencing library of each sample. WPS DE analysis is first conducted at individual sequencing library level thus this ID is used to match samples pooled in the same library.}
+#'   \item{\code{libID}}{unique IDs for identifying the sequencing library of each sample. EmpirDE analysis is first conducted at individual sequencing library level thus this ID is used to match samples pooled in the same library.}
 #'   \item{\code{plate2}}{(optional) Logical values indicating if the sample is cultured in the second 96-well plate. This column is only needed for WPS experiments that involves plate 2 confounding effects.}
 #' }
-#' @param params Custom WPS DE paramerers (default is NULL).
+#' @param params Custom EmpirDE paramerers (default is NULL).
 #' \describe{
 #'   \item{\code{pcutoffs}}{The p-outlier cutoff for selecting control-outlier genes. By default the value is 0.005 based on our benchmarking study. A single value or a numerical array can be supplied to titrate this parameter.}
 #'   \item{\code{freqCutoff}}{The frequency cutoff for defining the core control-outlier genes. Default is 25 percent of the number of libraries.}
@@ -35,21 +35,21 @@
 #'   \item{\code{medianCount_RNAi}}{median normalized count of samples in the treatment condition. Used in the independent filtering.}
 #'   \item{\code{medianCount_ctr}}{median normalized count of samples in the control condition. Used in the independent filtering.}
 #'   \item{\code{DE_source}}{The DE result for this gene is based on which type of DE analysis, either control-dependent (vs. control) or independent (vs. control-independent null).}
-#'   \item{\code{empirical_pvalue}}{Empirical p-values based on corrected test statistic. This is the final DE testing p-value of WPS DE framework.}
-#'   \item{\code{FDR}}{False Discovery Rate (FDR) of the DE test. This is the final DE testing FDR of WPS DE framework.}
+#'   \item{\code{empirical_pvalue}}{Empirical p-values based on corrected test statistic. This is the final DE testing p-value of EmpirDE framework.}
+#'   \item{\code{FDR}}{False Discovery Rate (FDR) of the DE test. This is the final DE testing FDR of EmpirDE framework.}
 #' }
 #'
 #'
-#' @export WPS_DE
+#' @export EmpirDE
 #'
 #' @author Xuhang Li
 #' @examples
 #' data("countTable")
 #' data("metaDataTable")
-#' result <- WPS_DE(countTable, metaDataTable)
+#' result <- EmpirDE(countTable, metaDataTable)
 
 
-WPS_DE <- function(countTable, metaDataTable, params = NULL) {
+EmpirDE <- function(countTable, metaDataTable, params = NULL) {
   # all libs to analyze
   libs = unique(metaDataTable$libID)
 
