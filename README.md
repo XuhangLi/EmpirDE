@@ -9,7 +9,7 @@ The R package **EmpirDE** is Differentially Expression (DE) analysis tool follow
 <img src="man/figures/GitHub.png" width="600"/>
 
 
-For WPS users, following the <span style="color:blue"> [WPS computational analysis protocol](https://TBD) for seamless analysis.
+For WPS users, following the <span style="color:blue"> [WPS computational analysis protocol](https://github.com/XuhangLi/WPS) for seamless analysis.
 
 To find out more details about **EmpirDE**, please read our manuscript:
 
