@@ -1,21 +1,21 @@
-## wpsDE: Worm Perturb-seq Differential Expression (DE) Analysis
+## EmpirDE: Worm Perturb-seq Differential Expression (DE) Analysis
 
 ------------------------------------------------------------------------
 Please note that we are still actively developing this package. Please contact us if you see any issues!
 ------------------------------------------------------------------------
 
-The R package **wpsDE** is Differentially Expression (DE) analysis tool following the two-pronged DE analysis framework using empirical null,developed as part of the Worm Perturb-seq (WPS) technology. wpsDE effectively identifies differentially expressed genes in large-scale transcriptomes dataset (i.e., > 100 conditions) by leveraging the many conditions profiled in parallel to rigorously control false discovery rate. Although this package was developed to support WPS data analysis, it is generally applicable to other similar large-scale transcriptomes data where many conditions are profiled together. The following illustration figure summarizes the two stages of wpsDE framework:
+The R package **EmpirDE** is Differentially Expression (DE) analysis tool following the two-pronged DE analysis framework using empirical null,developed as part of the Worm Perturb-seq (WPS) technology. EmpirDE effectively identifies differentially expressed genes in large-scale transcriptomes dataset (i.e., > 100 conditions) by leveraging the many conditions profiled in parallel to rigorously control false discovery rate. Although this package was developed to support WPS data analysis, it is generally applicable to other similar large-scale transcriptomes data where many conditions are profiled together. The following illustration figure summarizes the two stages of EmpirDE framework:
 
 <img src="man/figures/GitHub.png" width="600"/>
 
 
 For WPS users, following the <span style="color:blue"> [WPS computational analysis protocol](https://TBD) for seamless analysis.
 
-To find out more details about **wpsDE**, please read our manuscript:
+To find out more details about **EmpirDE**, please read our manuscript:
 
 [Title and authors](https://bioRxiv_link)
 
-This introduction page provides a quick tutorial for running **wpsDE** on standard WPS dataset or a custom dataset with many conditions. 
+This introduction page provides a quick tutorial for running **EmpirDE** on standard WPS dataset or a custom dataset with many conditions. 
 
 # Table of contents
 1. [Installation](#installation-)
@@ -34,12 +34,12 @@ if (!require("BiocManager", quietly = TRUE))
 BiocManager::install(version = "3.18")
 if (!require("devtools", quietly = TRUE))
     install.packages("devtools")
-devtools::install_github("XuhangLi/wpsDE")
+devtools::install_github("XuhangLi/EmpirDE")
 ```
 
 ## Quick Start<a name="quick-start"></a>
 
-The following code is a quick example of running the full **wpsDE**. The function `WPS_DE()` takes in a count table that is a gene-by-sample dataframe of read counts of the input dataset and a metadata table that is a dataframe with required metadata (such as covariates) to run DE analysis. For more details, please check on the help page by `?WPS_DE`. For a test run:
+The following code is a quick example of running the full **EmpirDE**. The function `WPS_DE()` takes in a count table that is a gene-by-sample dataframe of read counts of the input dataset and a metadata table that is a dataframe with required metadata (such as covariates) to run DE analysis. For more details, please check on the help page by `?WPS_DE`. For a test run:
 
 ``` r
 data("countTable")
@@ -61,10 +61,10 @@ The output of `WPS_DE()` is a list tables for the DE results of each condition. 
 -   `empirical_pvalue`: Empirical p-values based on corrected test statistic. This is the final DE testing p-value of WPS DE framework.
 -   `FDR`: False Discovery Rate (FDR) of the DE test. This is the final DE testing FDR of WPS DE framework.
 
-It is notable that running full **wpsDE** analysis on a real data set (e.g., 10,000 genes x 100 conditions x 3 replicates) can be time consuming. It is expected to see prolonged run time up to several hours. We are working on integrating parallelization functions to increase the performance.
+It is notable that running full **EmpirDE** analysis on a real data set (e.g., 10,000 genes x 100 conditions x 3 replicates) can be time consuming. It is expected to see prolonged run time up to several hours. We are working on integrating parallelization functions to increase the performance.
 
 
-For users interested in custom use of functionalities in **wpsDE**, the following code gives a quick example on two common applications:
+For users interested in custom use of functionalities in **EmpirDE**, the following code gives a quick example on two common applications:
 
 
 _To analyze the empirical null of a test statistic matrix, run_
@@ -87,10 +87,10 @@ The input `example_dds` is a DESeqDataSet objective that contains the input data
 
 ## Contact<a name="contact"></a>
 
-Any questions or suggestions on `wpsDE` are welcomed! Please report it on [issues](https://github.com/XuhangLi/wpsDE/issues), or contact Xuhang Li ([xuhang.li\@umassmed.edu](mailto:xuhang.li@umassmed.edu){.email}).
+Any questions or suggestions on `EmpirDE` are welcomed! Please report it on [issues](https://github.com/XuhangLi/EmpirDE/issues), or contact Xuhang Li ([xuhang.li\@umassmed.edu](mailto:xuhang.li@umassmed.edu){.email}).
 
 ## Related Manuscripts<a name="related-manuscripts"></a>
--  **wpsDE** integrates an algorithm (adaTiss) for robust fitting of the expression levels. See original paper at: 
+-  **EmpirDE** integrates an algorithm (adaTiss) for robust fitting of the expression levels. See original paper at: 
     -   **adaTiss**: [Wang M, Jiang L, Snyder MP. AdaTiSS: a novel data-Adaptive robust method for identifying Tissue Specificity Scores. <em>Bioinformatics</em> (2021).]([https://www.nature.com/articles/s41587-023-01772-1](https://academic.oup.com/bioinformatics/article/37/23/4469/6306407))
 
 ## Acknowledgement
