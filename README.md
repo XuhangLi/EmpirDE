@@ -1,4 +1,4 @@
-## EmpirDE: Worm Perturb-seq Differential Expression (DE) Analysis
+## EmpirDE: Empirical Null Based Differential Expression (DE) Analysis For Large-scale RNA-seq Data
 
 ------------------------------------------------------------------------
 Please note that we are still actively developing this package. Please contact us if you see any issues!
@@ -39,27 +39,27 @@ devtools::install_github("XuhangLi/EmpirDE")
 
 ## Quick Start<a name="quick-start"></a>
 
-The following code is a quick example of running the full **EmpirDE**. The function `WPS_DE()` takes in a count table that is a gene-by-sample dataframe of read counts of the input dataset and a metadata table that is a dataframe with required metadata (such as covariates) to run DE analysis. For more details, please check on the help page by `?WPS_DE`. For a test run:
+The following code is a quick example of running the full **EmpirDE**. The function `EmpirDE()` takes in a count table that is a gene-by-sample dataframe of read counts of the input dataset and a metadata table that is a dataframe with required metadata (such as covariates) to run DE analysis. For more details, please check on the help page by `?EmpirDE`. For a test run:
 
 ``` r
 data("countTable")
 data("metaDataTable")
-result <- WPS_DE(countTable, metaDataTable)
+result <- EmpirDE(countTable, metaDataTable)
 ```
 
-The required metadata of `WPS_DE()` includes the following columns:
+The required metadata of `EmpirDE()` includes the following columns:
 
 - `sampleID`: unique IDs for each sample that correspond to the column names in countTable.
 - `covTreatment`: covariate indicating experimental treatments to be tested for (e.g., RNAi conditions). Must have a 'control' condition if control-dependent DE analysis is deisred.
 - `covBatch`: covariate indicating experimental batches, which by default is the replicate batch. Other reasonable batch labels within each library may also be used. 
-- `libID`: unique IDs for identifying the sequencing library of each sample. WPS DE analysis is first conducted at individual sequencing library level thus this ID is used to match samples pooled in the same library.
+- `libID`: unique IDs for identifying the sequencing library of each sample. EmpirDE analysis is first conducted at individual sequencing library level thus this ID is used to match samples pooled in the same library.
 
-The output of `WPS_DE()` is a list tables for the DE results of each condition. Key columns include: 
+The output of `EmpirDE()` is a list tables for the DE results of each condition. Key columns include: 
 
 -   `log2FoldChange_raw`: log2FoldChange from DESeq2. Adding the suffix '_raw' is to emphasize this metric is directly from DESeq2 model without applying any shrinkage algorithm.
 -   `DE_source`: The DE result for this gene is based on which type of DE analysis, either control-dependent (vs. control) or independent (vs. control-independent null).
--   `empirical_pvalue`: Empirical p-values based on corrected test statistic. This is the final DE testing p-value of WPS DE framework.
--   `FDR`: False Discovery Rate (FDR) of the DE test. This is the final DE testing FDR of WPS DE framework.
+-   `empirical_pvalue`: Empirical p-values based on corrected test statistic. This is the final DE testing p-value of EmpirDE framework.
+-   `FDR`: False Discovery Rate (FDR) of the DE test. This is the final DE testing FDR of EmpirDE framework.
 
 It is notable that running full **EmpirDE** analysis on a real data set (e.g., 10,000 genes x 100 conditions x 3 replicates) can be time consuming. It is expected to see prolonged run time up to several hours. We are working on integrating parallelization functions to increase the performance.
 
