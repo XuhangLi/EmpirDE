@@ -1,4 +1,4 @@
-## EmpirDE: Worm Perturb-seq Differential Expression (DE) Analysis
+## EmpirDE: Empirical Null Based Differential Expression (DE) Analysis For Large-scale RNA-seq Data
 
 ------------------------------------------------------------------------
 Please note that we are still actively developing this package. Please contact us if you see any issues!
