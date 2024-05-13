@@ -87,7 +87,7 @@ The input `example_dds` is a DESeqDataSet objective that contains the input data
 
 ## Contact<a name="contact"></a>
 
-Any questions or suggestions on `EmpirDE` are welcomed! Please report it on [issues](https://github.com/XuhangLi/EmpirDE/issues), or contact Xuhang Li ([xuhang.li\@umassmed.edu](mailto:xuhang.li@umassmed.edu){.email}).
+Any questions or suggestions on `EmpirDE` are welcomed! Please report it on [issues](https://github.com/XuhangLi/EmpirDE/issues), or contact Xuhang Li ([xuhang.li@umassmed.edu](mailto:xuhang.li@umassmed.edu)).
 
 ## Related Manuscripts<a name="related-manuscripts"></a>
 -  **EmpirDE** integrates an algorithm (adaTiss) for robust fitting of the expression levels. See original paper at: 
