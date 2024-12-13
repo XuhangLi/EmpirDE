@@ -1,6 +1,6 @@
 Package: EmpirDE
 Title: Empirical DE: Differential Expression Analysis For Large-scale RNA-seq Data Based On Gene-specific Empirical Null
-Version: 1.0.0
+Version: 1.0.1
 Authors@R: 
     person("Xuhang", "Li", , "xuhang.li@umassmed.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-6071-9605"))
