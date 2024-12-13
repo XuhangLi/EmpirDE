@@ -9,7 +9,7 @@ EmpirDE(countTable, metaDataTable, params = NULL)
 \arguments{
 \item{countTable}{A gene-by-sample matrix of read counts as the input dataset for DE analysis}
 
-\item{metaDataTable}{A metadata table for the input dataset with the following columns:
+\item{metaDataTable}{A metadata table for the input dataset with the following columns (please avoid using any special characters, including space and hypen, in this table):
 \describe{
 \item{\code{sampleID}}{unique IDs for each sample that correspond to the column names in \code{countTable}.}
 \item{\code{covTreatment}}{covariate indicating experimental treatments to be tested for (e.g., RNAi conditions). Must have a 'control' condition if control-dependent DE analysis is deisred.}

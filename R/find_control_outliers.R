@@ -62,12 +62,14 @@ find_control_outliers <- function(ctr_dep_DE_res, libs, pcutoffs, freqCutoff, FC
   for (z in 1:length(pcutoffs)){
     genelist2 = table(unlist(genelist_all_cutoffs[[z]]))
     coreset = names(genelist2)[genelist2 > freqCutoff]
-    cat('At cutoff ', pcutoffs[z],', ',length(coreset),' core control-outlier genes identified',sep = '')
+    cat('At cutoff ', pcutoffs[z],', ',length(coreset),' core control-outlier genes identified.\n',sep = '')
     coresetTbl = data.frame(gene = coreset)
     coresetTbl$freq = genelist2[coreset]
 
-    for (i in 1:length(genelist_all_cutoffs[[z]])){
-      genelist_all_cutoffs[[z]][[i]] = union(genelist_all_cutoffs[[z]][[i]], coreset)
+    if (length(genelist_all_cutoffs[[z]]) > 0){
+      for (i in 1:length(genelist_all_cutoffs[[z]])){
+        genelist_all_cutoffs[[z]][[i]] = union(genelist_all_cutoffs[[z]][[i]], coreset)
+      }
     }
   }
 
