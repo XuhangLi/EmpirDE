@@ -37,7 +37,7 @@ control_dependent_DE <- function(dds) {
     colnames(res)[2] = 'log2FoldChange_raw'
 
     # calculate the median normalized counts for treatments and controls
-    mVals1 = matrixStats::rowMedians(DESeq2::counts(dds.filt, normalized=TRUE)[,dds.filt$RNAi == targetGene])
+    mVals1 = matrixStats::rowMedians(as.matrix(DESeq2::counts(dds.filt, normalized=TRUE)[,dds.filt$RNAi == targetGene])) # in case only one sample
     names(mVals1) = rownames(dds.filt)
     mVals2 = matrixStats::rowMedians(DESeq2::counts(dds.filt, normalized=TRUE)[,dds.filt$RNAi == 'control'])
     names(mVals2) = rownames(dds.filt)

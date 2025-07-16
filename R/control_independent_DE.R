@@ -101,6 +101,19 @@ control_independent_DE <- function(dds_ori, adaZmat, zcutoff = 2.5){
     keep <- rowSums(DESeq2::counts(dds)>=10) >= 1
     dds <- dds[keep,]
 
+    # because of the special one-to-all comparision, we may have colinearity issues because 'others' samples can span multiple batch covariates
+    # let's add a sanity check and filter step
+    mm <- model.matrix(DESeq2::design(dds), data = SummarizedExperiment::colData(dds))
+    # qr(mm)$rank  # gives the rank of the model matrix
+    # ncol(mm)     # number of columns (i.e., expected full rank)
+    dep = stats::alias(lm(rep(1, nrow(mm)) ~ mm - 1))
+    if (stringr::str_detect(rownames(dep$Complete),'RNAi')){
+      stop('Colinearity in treatment covariates - cannot handle!')
+    }
+    colinearVar = stringr::str_remove(rownames(dep$Complete),'mmbatchLabel')
+    dds = dds[,!(dds$batchLabel %in% colinearVar)]
+    SummarizedExperiment::colData(dds)$batchLabel <- droplevels(SummarizedExperiment::colData(dds)$batchLabel)
+
     # run DEseq2
     invisible(suppressMessages(dds <- DESeq2::DESeq(dds,minReplicatesForReplace=7)))
     # filter results
@@ -137,7 +150,7 @@ control_independent_DE <- function(dds_ori, adaZmat, zcutoff = 2.5){
         res = res1
 
         # attach the counts information
-        mVals1 = matrixStats::rowMedians(DESeq2::counts(dds.filt, normalized=TRUE)[,dds.filt$RNAi == targetGene])
+        mVals1 = matrixStats::rowMedians(as.matrix(DESeq2::counts(dds.filt, normalized=TRUE)[,dds.filt$RNAi == targetGene])) # in case only one sample
         names(mVals1) = rownames(dds.filt)
         mVals2 = matrixStats::rowMedians(DESeq2::counts(dds.filt, normalized=TRUE)[,dds.filt$RNAi == 'others'])
         names(mVals2) = rownames(dds.filt)
@@ -156,7 +169,7 @@ control_independent_DE <- function(dds_ori, adaZmat, zcutoff = 2.5){
       colnames(res)[2] = 'log2FoldChange_raw'
 
       # attach the counts information
-      mVals1 = matrixStats::rowMedians(DESeq2::counts(dds.filt, normalized=TRUE)[,dds.filt$RNAi == targetGene])
+      mVals1 = matrixStats::rowMedians(as.matrix(DESeq2::counts(dds.filt, normalized=TRUE)[,dds.filt$RNAi == targetGene]))
       names(mVals1) = rownames(dds.filt)
       mVals2 = matrixStats::rowMedians(DESeq2::counts(dds.filt, normalized=TRUE)[,dds.filt$RNAi == 'others'])
       names(mVals2) = rownames(dds.filt)
